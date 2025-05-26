@@ -10,7 +10,7 @@ from textblob import TextBlob
 # -- Load Reddit API credentials from Streamlit secrets --
 REDDIT_CLIENT_ID = st.secrets["REDDIT_CLIENT_ID"]
 REDDIT_CLIENT_SECRET = st.secrets["REDDIT_CLIENT_SECRET"]
-REDDIT_USER_AGENT = "reddit-search-app by u/your_username"
+REDDIT_USER_AGENT = "reddit-search-app by u/klidoop"
 
 # -- Initialize Reddit client --
 reddit = praw.Reddit(
