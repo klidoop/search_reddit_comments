@@ -36,21 +36,30 @@ def search_reddit_comments(subreddit_name, keyword, limit=500):
 # -- Streamlit UI --
 st.title("🔎 Reddit Comment Search (Live via Reddit API)")
 
-subreddit_input = st.text_input("Subreddit", value="stocks")
-keyword_input = st.text_input("Keyword", value="NVIDIA")
+subreddit_input = st.text_input("Subreddit", value="GoogleMessages")
+keyword_input = st.text_input("Keyword", value="rcs")
 max_comments = st.slider("Max Comments to Search", min_value=100, max_value=1000, step=100, value=500)
 
 df = pd.DataFrame()
 
+# Initialize df in session_state if not already present
+if "df" not in st.session_state:
+    st.session_state.df = pd.DataFrame()
+
+# Search button
 if st.button("Search"):
     with st.spinner("Fetching comments..."):
         df = search_reddit_comments(subreddit_input, keyword_input, max_comments)
-        if df.empty:
-            st.warning("No comments found.")
-        else:
-            st.success(f"Found {len(df)} matching comments.")
-            st.dataframe(df)
-            st.download_button("Download CSV", df.to_csv(index=False), "reddit_comments.csv")
+        st.session_state.df = df  # save to session
+
+# Retrieve from session state
+df = st.session_state.df
+
+if not df.empty:
+    st.success(f"Found {len(df)} matching comments.")
+    st.dataframe(df)
+    st.download_button("Download CSV", df.to_csv(index=False), "reddit_comments.csv")
+
 
 # -- Word Cloud & Sentiment --
 if not df.empty:
