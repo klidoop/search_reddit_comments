@@ -3,6 +3,9 @@ import streamlit as st
 import pandas as pd
 import praw
 from datetime import datetime, timezone
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from textblob import TextBlob
 
 # -- Load Reddit API credentials from Streamlit secrets --
 REDDIT_CLIENT_ID = st.secrets["REDDIT_CLIENT_ID"]
@@ -46,3 +49,26 @@ if st.button("Search"):
             st.success(f"Found {len(df)} matching comments.")
             st.dataframe(df)
             st.download_button("Download CSV", df.to_csv(index=False), "reddit_comments.csv")
+
+# --- Word Cloud ---
+if st.checkbox("Show Word Cloud"):
+    text = " ".join(df["body"].tolist())
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+    
+    st.subheader("Word Cloud")
+    fig, ax = plt.subplots()
+    ax.imshow(wordcloud, interpolation="bilinear")
+    ax.axis("off")
+    st.pyplot(fig)
+
+# --- Sentiment Analysis ---
+if st.checkbox("Run Sentiment Analysis"):
+    def get_sentiment(text):
+        return TextBlob(text).sentiment.polarity
+
+    df["sentiment"] = df["body"].apply(get_sentiment)
+    avg_sentiment = df["sentiment"].mean()
+
+    st.subheader("Sentiment Analysis")
+    st.write(f"Average Sentiment Polarity: `{avg_sentiment:.3f}` (range: -1 to 1)")
+    st.bar_chart(df["sentiment"])
