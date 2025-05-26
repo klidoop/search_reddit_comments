@@ -1,31 +1,48 @@
-#@title Reddit Comment Search with PRAW (Live Data)
-import praw
+#@title Reddit Comment Search Streamlit App (PRAW Version)
+import streamlit as st
 import pandas as pd
-from datetime import datetime
+import praw
+from datetime import datetime, timezone
 
-# Initialize Reddit client
-reddit = praw.Reddit(client_id='zEOZq9FW3kqOSFcuNE4dZg',
-                     client_secret='upUOIGxU5o__753cGC9hebhcfxvCxg',
-                     user_agent='feedback_scraper:v1.0 (by u/klidoop)',
-                     username = 'klidoop',
-                     password = '(dseK$V22+=bMg3',
-                     check_for_async=False  # Prevent async-related issues
+# -- Load Reddit API credentials from Streamlit secrets --
+REDDIT_CLIENT_ID = st.secrets["REDDIT_CLIENT_ID"]
+REDDIT_CLIENT_SECRET = st.secrets["REDDIT_CLIENT_SECRET"]
+REDDIT_USER_AGENT = "reddit-search-app by u/your_username"
+
+# -- Initialize Reddit client --
+reddit = praw.Reddit(
+    client_id=REDDIT_CLIENT_ID,
+    client_secret=REDDIT_CLIENT_SECRET,
+    user_agent=REDDIT_USER_AGENT
 )
 
-# Search latest comments in a subreddit
-def search_reddit_comments(subreddit_name, keyword, limit=1000):
+# -- Function to search comments --
+def search_reddit_comments(subreddit_name, keyword, limit=500):
     subreddit = reddit.subreddit(subreddit_name)
     comments = []
     for comment in subreddit.comments(limit=limit):
         if keyword.lower() in comment.body.lower():
             comments.append({
                 "author": str(comment.author),
-                "created_utc": datetime.fromtimestamp(comment.created_utc, tz=datetime.UTC),
+                "created_utc": datetime.fromtimestamp(comment.created_utc, tz=timezone.utc),
                 "body": comment.body,
                 "permalink": f"https://reddit.com{comment.permalink}"
             })
     return pd.DataFrame(comments)
 
-# Example
-df = search_reddit_comments("GooglePixel", "call screen", 500)
-print(df.head())
+# -- Streamlit UI --
+st.title("🔎 Reddit Comment Search (Live via Reddit API)")
+
+subreddit_input = st.text_input("Subreddit", value="stocks")
+keyword_input = st.text_input("Keyword", value="NVIDIA")
+max_comments = st.slider("Max Comments to Search", min_value=100, max_value=1000, step=100, value=500)
+
+if st.button("Search"):
+    with st.spinner("Fetching comments..."):
+        df = search_reddit_comments(subreddit_input, keyword_input, max_comments)
+        if df.empty:
+            st.warning("No comments found.")
+        else:
+            st.success(f"Found {len(df)} matching comments.")
+            st.dataframe(df)
+            st.download_button("Download CSV", df.to_csv(index=False), "reddit_comments.csv")
