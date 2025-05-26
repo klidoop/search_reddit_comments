@@ -20,7 +20,7 @@ def search_reddit_comments(subreddit_name, keyword, limit=1000):
         if keyword.lower() in comment.body.lower():
             comments.append({
                 "author": str(comment.author),
-                "created_utc": datetime.utcfromtimestamp(comment.created_utc),
+                "created_utc": datetime.fromtimestamp(comment.created_utc, tz=datetime.UTC),
                 "body": comment.body,
                 "permalink": f"https://reddit.com{comment.permalink}"
             })
