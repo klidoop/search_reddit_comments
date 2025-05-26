@@ -1,5 +1,3 @@
-# search_reddit_comments
-
 # Reddit Comment Search App
 
 This app lets you search Reddit comments by subreddit, keyword, and date range using the Pushshift API.
