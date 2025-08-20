@@ -36,8 +36,8 @@ def search_reddit_comments(subreddit_name, keyword, limit=500):
 # -- Streamlit UI --
 st.title("🔎 Reddit Comment Search (Live via Reddit API)")
 
-subreddit_input = st.text_input("Subreddit", value="GoogleMessages")
-keyword_input = st.text_input("Keyword", value="rcs")
+subreddit_input = st.text_input("Subreddit", value="GooglePixel")
+keyword_input = st.text_input("Keyword", value="calling")
 max_comments = st.slider("Max Comments to Search", min_value=100, max_value=1000, step=100, value=500)
 
 df = pd.DataFrame()
